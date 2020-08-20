@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Snips.Data;
+using Snips.Models;
 
 namespace Snips.Controllers
 {
@@ -48,8 +49,16 @@ namespace Snips.Controllers
             {
                 snipsQuery = snipsQuery.Where(x => x.Created.Date == CreatedDate.ToUniversalTime().Date);
             }
-
-            return View("Index",await snipsQuery.ToListAsync());
+            var snipsQueryItems = snipsQuery.Select(x => new NoteDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                HasCode = x.HasCode,
+                CodeLanguage = x.CodeLanguage,
+                Created = x.Created,
+                LastModified = (DateTime)x.LastModified
+            });
+            return View("Index",await snipsQueryItems.ToListAsync());
         }
 
         // GET: Notes
@@ -71,8 +80,17 @@ namespace Snips.Controllers
         // GET: Notes
         public async Task<IActionResult> Index()
         {
-            var snipsContext = _context.Notes;
-            return View(await snipsContext.ToListAsync());
+            var snipsQueryItems = _context.Notes.Select(x => new
+            NoteDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                HasCode = x.HasCode,
+                CodeLanguage = x.CodeLanguage,
+                Created = x.Created,
+                LastModified = (DateTime)x.LastModified
+            }).ToListAsync();
+            return View(await snipsQueryItems);
         }
 
         // GET: Notes/Details/5

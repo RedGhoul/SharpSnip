@@ -2,16 +2,21 @@
 
 @{
     ViewData["Title"] = "Edit";
+    string ListToDoListItemID = "";
+    string ListToDoListItemContent = "";
 }
 
-<h1>Edit</h1>
+<h1></h1>
 
-<h4>ToDoList</h4>
+<h4>Edit - ToDoList</h4>
+<hr />
+<div>
+    <a asp-action="Index" class="btn btn-primary">Back to List</a>
+</div>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -23,37 +28,49 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Deleted" /> @Html.DisplayNameFor(model => model.Deleted)
-                </label>
+            <div class="form-group">
+                <label class="control-label">List Items</label>
+            </div>
+
+            <div class="form-group" id="ToDoListItemGroup">
+                @foreach (var item in Model.ToDoListItems)
+                {
+                    {
+                        ListToDoListItemID = "ToDoListItems_" + @item.Id + "__ToDoListItemID";
+                        ListToDoListItemContent = "ToDoListItems_" + @item.Id + "__Content";
+                    }
+
+                    <label style="padding-top:10px;" class="control-label" for=ToDoListItems[@item.Id].Content>New Item</label>
+                    <input class="form-control" id=@ListToDoListItemID name=ToDoListItems[@item.Id].ToDoListItemID hidden value="@item.Id">
+                    <input class="form-control" id=@ListToDoListItemContent name=ToDoListItems[@item.Id].Content value="@item.Content">
+                }
             </div>
             <div class="form-group">
-                <label asp-for="ApplicationUserId" class="control-label"></label>
-                <select asp-for="ApplicationUserId" class="form-control" asp-items="ViewBag.ApplicationUserId"></select>
-                <span asp-validation-for="ApplicationUserId" class="text-danger"></span>
+                <a id="Add_ToDoListItems" class="btn btn-primary">Add New Items +</a>
             </div>
             <div class="form-group">
-                <label asp-for="Created" class="control-label"></label>
-                <input asp-for="Created" class="form-control" />
-                <span asp-validation-for="Created" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastModified" class="control-label"></label>
-                <input asp-for="LastModified" class="form-control" />
-                <span asp-validation-for="LastModified" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Update" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        var currentIndex = @Model.ToDoListItems.Count;
+       window.addEventListener('load', (event) => {
+           var Add_ToDoListItems = document.getElementById("Add_ToDoListItems");
+           Add_ToDoListItems.addEventListener("click", function () {
+               $("#ToDoListItemGroup").append(`
+                    <label style="padding-top:10px;" class="control-label" for=ToDoListItems[${currentIndex}].Content>New Item</label>
+                    <input class="form-control" id=ToDoListItems_${currentIndex}__ToDoListItemID name=ToDoListItems[${currentIndex}].ToDoListItemID hidden>
+                    <input class="form-control" id=ToDoListItems_${currentIndex}__Content name=ToDoListItems[${currentIndex}].Content >
+                `);
+
+               currentIndex++;
+           });
+       });
+    </script>
 }
