@@ -36,13 +36,13 @@
                 @foreach (var item in Model.ToDoListItems)
                 {
                     {
-                        ListToDoListItemID = "ToDoListItems_" + @item.Id + "__ToDoListItemID";
-                        ListToDoListItemContent = "ToDoListItems_" + @item.Id + "__Content";
+                        ListToDoListItemID = "ToDoListItems[" + @item.Id + "].ToDoListItemID";
+                        ListToDoListItemContent = "ToDoListItems[" + @item.Id + "].Content";
                     }
 
                     <label style="padding-top:10px;" class="control-label" for=ToDoListItems[@item.Id].Content>New Item</label>
-                    <input class="form-control" id=@ListToDoListItemID name=ToDoListItems[@item.Id].ToDoListItemID hidden value="@item.Id">
-                    <input class="form-control" id=@ListToDoListItemContent name=ToDoListItems[@item.Id].Content value="@item.Content">
+                    <input class="form-control" name="@ListToDoListItemID" hidden value="@item.Id">
+                    <input class="form-control"  name="@ListToDoListItemContent" value="@item.Content">
                 }
             </div>
             <div class="form-group">

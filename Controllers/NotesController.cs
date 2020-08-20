@@ -49,7 +49,7 @@ namespace Snips.Controllers
             {
                 snipsQuery = snipsQuery.Where(x => x.Created.Date == CreatedDate.ToUniversalTime().Date);
             }
-            var snipsQueryItems = snipsQuery.Select(x => new NoteDTO
+            var snipsQueryItems = snipsQuery.OrderByDescending(x => x.LastModified).Select(x => new NoteDTO
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -80,7 +80,7 @@ namespace Snips.Controllers
         // GET: Notes
         public async Task<IActionResult> Index()
         {
-            var snipsQueryItems = _context.Notes.Select(x => new
+            var snipsQueryItems = _context.Notes.OrderByDescending(x => x.LastModified).Select(x => new
             NoteDTO
             {
                 Id = x.Id,
