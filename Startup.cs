@@ -42,6 +42,9 @@ namespace Snips
             services.AddResponseCompression();
             services.AddTransient<UserManager<ApplicationUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
+
+            services.AddDbContext<SnipsContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("SnipsContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
