@@ -20,23 +20,6 @@ namespace Snips.Data
         public DbSet<Note> Notes { get; set; }
         public DbSet<EndOfDayCheckIn> EndOfDayCheckIns { get; set; }
 
-        //public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        //{
-        //    foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-        //    {
-        //        switch (entry.State)
-        //        {
-        //            case EntityState.Added:
-        //                entry.Entity.Created = DateTime.UtcNow;
-        //                break;
-        //            case EntityState.Modified:
-        //                entry.Entity.LastModified = DateTime.UtcNow;
-        //                break;
-        //        }
-        //    }
-
-        //    return base.SaveChangesAsync(cancellationToken);
-        //}
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

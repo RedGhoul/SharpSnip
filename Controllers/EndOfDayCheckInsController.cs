@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,17 +14,20 @@ namespace Snips.Controllers
     [Authorize]
     public class EndOfDayCheckInsController : Controller
     {
-        private readonly SnipsContext _context;
+        private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> _userManager;
 
-        public EndOfDayCheckInsController(SnipsContext context)
+        public EndOfDayCheckInsController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: EndOfDayCheckIns
         public async Task<IActionResult> Index()
         {
-            var snipsContext = _context.EndOfDayCheckIn.Include(e => e.ApplicationUser);
+            var snipsContext = _context.EndOfDayCheckIns
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()));
             return View(await snipsContext.ToListAsync());
         }
 
@@ -35,8 +39,8 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var endOfDayCheckIn = await _context.EndOfDayCheckIn
-                .Include(e => e.ApplicationUser)
+            var endOfDayCheckIn = await _context.EndOfDayCheckIns
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()))
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (endOfDayCheckIn == null)
             {
@@ -49,24 +53,23 @@ namespace Snips.Controllers
         // GET: EndOfDayCheckIns/Create
         public IActionResult Create()
         {
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id");
             return View();
         }
 
         // POST: EndOfDayCheckIns/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Comments,WhatWentWell,WhatWentBad,ApplicationUserId,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
         {
             if (ModelState.IsValid)
             {
+                endOfDayCheckIn.LastModified = DateTime.UtcNow;
+                endOfDayCheckIn.Created = DateTime.UtcNow;
+                endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
                 _context.Add(endOfDayCheckIn);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", endOfDayCheckIn.ApplicationUserId);
             return View(endOfDayCheckIn);
         }
 
@@ -78,21 +81,18 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var endOfDayCheckIn = await _context.EndOfDayCheckIn.FindAsync(id);
+            var endOfDayCheckIn = await _context.EndOfDayCheckIns.FindAsync(id);
             if (endOfDayCheckIn == null)
             {
                 return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", endOfDayCheckIn.ApplicationUserId);
             return View(endOfDayCheckIn);
         }
 
         // POST: EndOfDayCheckIns/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Comments,WhatWentWell,WhatWentBad,ApplicationUserId,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Comments,WhatWentWell,WhatWentBad,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
         {
             if (id != endOfDayCheckIn.Id)
             {
@@ -103,7 +103,12 @@ namespace Snips.Controllers
             {
                 try
                 {
+                    endOfDayCheckIn.Created = DateTime.UtcNow;
+                    
+                    endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
+
                     _context.Update(endOfDayCheckIn);
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -119,7 +124,6 @@ namespace Snips.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", endOfDayCheckIn.ApplicationUserId);
             return View(endOfDayCheckIn);
         }
 
@@ -131,8 +135,8 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var endOfDayCheckIn = await _context.EndOfDayCheckIn
-                .Include(e => e.ApplicationUser)
+            var endOfDayCheckIn = await _context.EndOfDayCheckIns
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()))
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (endOfDayCheckIn == null)
             {
@@ -147,15 +151,24 @@ namespace Snips.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var endOfDayCheckIn = await _context.EndOfDayCheckIn.FindAsync(id);
-            _context.EndOfDayCheckIn.Remove(endOfDayCheckIn);
+            var endOfDayCheckIn = await _context.EndOfDayCheckIns.FindAsync(id);
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool EndOfDayCheckInExists(int id)
         {
-            return _context.EndOfDayCheckIn.Any(e => e.Id == id);
+            return _context.EndOfDayCheckIns.Any(e => e.Id == id);
+        }
+
+        private string GetCurrentUserId()
+        {
+            if (User != null)
+            {
+                return _userManager.GetUserId(User);
+            }
+            else { return null; }
         }
     }
 }

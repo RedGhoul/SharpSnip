@@ -13,6 +13,7 @@ namespace Snips.Data
         public string Comments { get; set; }
         public string WhatWentWell { get; set; }
         public string WhatWentBad { get; set; }
+        public bool Deleted { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
         public string ApplicationUserId { get; set; }
         [NotMapped]

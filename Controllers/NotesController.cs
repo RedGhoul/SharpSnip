@@ -29,7 +29,7 @@ namespace Snips.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(string SearchTerm, DateTime CreatedDate, DateTime LastModifiedDate)
         {
-            IQueryable<Note> snipsQuery = _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()));
+            IQueryable<Note> snipsQuery = _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false);
 
 
             if (!string.IsNullOrEmpty(SearchTerm))
@@ -66,12 +66,13 @@ namespace Snips.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReIndex()
         {
-            IQueryable<Note> snipsQuery = _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()));
+            IQueryable<Note> snipsQuery = _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false);
 
             var allSnipQueries = await snipsQuery.ToListAsync();
 
             foreach (var item in allSnipQueries)
             {
+                item.LastModified = DateTime.UtcNow;
                 _context.Update(item);
                 await _context.SaveChangesAsync();
             }
@@ -80,7 +81,8 @@ namespace Snips.Controllers
         // GET: Notes
         public async Task<IActionResult> Index()
         {
-            var snipsQueryItems = _context.Notes.OrderByDescending(x => x.LastModified).Select(x => new
+            var snipsQueryItems = _context.Notes.Where(x => x.Deleted == false)
+                .OrderByDescending(x => x.LastModified).Select(x => new
             NoteDTO
             {
                 Id = x.Id,
@@ -88,7 +90,7 @@ namespace Snips.Controllers
                 HasCode = x.HasCode,
                 CodeLanguage = x.CodeLanguage,
                 Created = x.Created,
-                LastModified = (DateTime)x.LastModified
+                LastModified = x.LastModified.GetValueOrDefault(DateTime.UtcNow)
             }).ToListAsync();
             return View(await snipsQueryItems);
         }
@@ -101,8 +103,8 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var note = await _context.Notes
-                .Include(n => n.ApplicationUser)
+            var note = await _context.Notes.Where(x => x.Deleted == false)
+                .Include(x => x.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (note == null)
             {
@@ -137,6 +139,10 @@ namespace Snips.Controllers
                 {
                     note.HasCode = true;
                 }
+                
+                note.LastModified = DateTime.UtcNow;
+                note.Created = DateTime.UtcNow;
+
                 _context.Add(note);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -187,6 +193,7 @@ namespace Snips.Controllers
                     {
                         note.HasCode = true;
                     }
+                    note.LastModified = DateTime.UtcNow;
                     _context.Update(note);
                     await _context.SaveChangesAsync();
                 }
@@ -203,7 +210,6 @@ namespace Snips.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", note.ApplicationUserId);
             return View(note);
         }
 
@@ -215,8 +221,7 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var note = await _context.Notes
-                .Include(n => n.ApplicationUser)
+            var note = await _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()))
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (note == null)
             {
@@ -231,9 +236,15 @@ namespace Snips.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var note = await _context.Notes.FindAsync(id);
-            _context.Notes.Remove(note);
-            await _context.SaveChangesAsync();
+            var note = await _context.Notes
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Id == id)
+                .FirstOrDefaultAsync();
+            if(note != null)
+            {
+                note.Deleted = true;
+                await _context.SaveChangesAsync();
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 
