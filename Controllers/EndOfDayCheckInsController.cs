@@ -27,7 +27,7 @@ namespace Snips.Controllers
         public async Task<IActionResult> Index()
         {
             var snipsContext = _context.EndOfDayCheckIns
-                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()));
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false);
             return View(await snipsContext.ToListAsync());
         }
 
@@ -40,7 +40,7 @@ namespace Snips.Controllers
             }
 
             var endOfDayCheckIn = await _context.EndOfDayCheckIns
-                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()))
+                .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (endOfDayCheckIn == null)
             {
@@ -59,7 +59,7 @@ namespace Snips.Controllers
         // POST: EndOfDayCheckIns/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Comments,WhatWentWell,WhatWentBad,ApplicationUserId,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
+        public async Task<IActionResult> Create([Bind("Id,Comments,WhatWentWell,WhatWentBad,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
         {
             if (ModelState.IsValid)
             {
@@ -81,7 +81,8 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var endOfDayCheckIn = await _context.EndOfDayCheckIns.FindAsync(id);
+            var endOfDayCheckIn = await _context.EndOfDayCheckIns
+                .Where(x => x.Id == id && x.Deleted == false).FirstOrDefaultAsync();
             if (endOfDayCheckIn == null)
             {
                 return NotFound();
@@ -152,7 +153,7 @@ namespace Snips.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var endOfDayCheckIn = await _context.EndOfDayCheckIns.FindAsync(id);
-            
+            endOfDayCheckIn.Deleted = true;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

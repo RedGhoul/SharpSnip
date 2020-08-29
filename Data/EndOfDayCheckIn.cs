@@ -9,6 +9,10 @@ namespace Snips.Data
 {
     public class EndOfDayCheckIn : AuditableEntity
     {
+        public EndOfDayCheckIn()
+        {
+            this.Deleted = false;
+        }
         public int Id { get; set; }
         public string Comments { get; set; }
         public string WhatWentWell { get; set; }
