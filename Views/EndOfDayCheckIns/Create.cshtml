@@ -1,41 +1,43 @@
 ﻿@model Snips.Data.EndOfDayCheckIn
 
-@{
-    ViewData["Title"] = "Create";
-}
+<link href="https://cdn.quilljs.com/1.3.4/quill.snow.css" rel="stylesheet">
+<style>
+    .control-label {
+        font-size: xx-large;
+    }
 
-<h1>Create</h1>
-
-<h4>EndOfDayCheckIn</h4>
+    #codeEditor {
+        height: 500px;
+        width: 100%;
+    }
+</style>
+<h4>End Of Day Check In</h4>
+<hr />
+<div>
+    <a asp-action="Index" class="btn btn-primary">Back to List</a>
+</div>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Comments" class="control-label"></label>
-                <input asp-for="Comments" class="form-control" />
-                <span asp-validation-for="Comments" class="text-danger"></span>
+                <label class="control-label" for="Comments">Comments</label>
+                <input asp-for="Comments" class="form-control" hidden />
+                <div id="editorContentComments" style="height: 300px;">
+                </div>
             </div>
             <div class="form-group">
-                <label asp-for="WhatWentWell" class="control-label"></label>
-                <input asp-for="WhatWentWell" class="form-control" />
-                <span asp-validation-for="WhatWentWell" class="text-danger"></span>
+                <label class="control-label" for="WhatWentWell">What Went Well</label>
+                <input asp-for="WhatWentWell" class="form-control" hidden />
+                <div id="editorContentWhatWentWell" style="height: 300px;">
+                </div>
             </div>
             <div class="form-group">
-                <label asp-for="WhatWentBad" class="control-label"></label>
-                <input asp-for="WhatWentBad" class="form-control" />
-                <span asp-validation-for="WhatWentBad" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Created" class="control-label"></label>
-                <input asp-for="Created" class="form-control" />
-                <span asp-validation-for="Created" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastModified" class="control-label"></label>
-                <input asp-for="LastModified" class="form-control" />
-                <span asp-validation-for="LastModified" class="text-danger"></span>
+                <label class="control-label" for="WhatWentWell">What Went Bad</label>
+                <input asp-for="WhatWentBad" class="form-control" hidden />
+                <div id="editorContentWhatWentBad" style="height: 300px;">
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -44,10 +46,64 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.quilljs.com/1.3.4/quill.js"></script>
+    <script>
+        window.addEventListener('load', (event) => {
+            var toolbarOptions = [
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote', 'code-block'],
+
+                [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+                [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+                [{ 'direction': 'rtl' }],                         // text direction
+
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+
+                ['clean']                                         // remove formatting button
+            ];
+            var quillDocsComments = new Quill('#editorContentComments', {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+            });
+            quillDocsComments.on('text-change', function (delta) {
+                var Documentation = document.querySelector('input[name=Comments]');
+                Documentation.value = quillDocsComments.root.innerHTML;
+            });
+
+
+            var quillDocsWhatWentWell = new Quill('#editorContentWhatWentWell', {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+            });
+            quillDocsWhatWentWell.on('text-change', function (delta) {
+                var Documentation = document.querySelector('input[name=WhatWentWell]');
+                Documentation.value = quillDocsWhatWentWell.root.innerHTML;
+            });
+
+           
+            var quillDocsWhatWentBad = new Quill('#editorContentWhatWentBad', {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+            });
+            quillDocsWhatWentBad.on('text-change', function (delta) {
+                var Documentation = document.querySelector('input[name=WhatWentBad]');
+                Documentation.value = quillDocsWhatWentBad.root.innerHTML;
+            });
+        
+        });
+    </script>
 }

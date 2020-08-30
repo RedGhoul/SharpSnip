@@ -1,59 +1,56 @@
-﻿@model IEnumerable<Snips.Data.EndOfDayCheckIn>
+﻿@model List<Snips.Data.EndOfDayCheckIn>
+<link href="https://unpkg.com/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css" rel="stylesheet">
 
-@{
-    ViewData["Title"] = "Index";
-}
-
-<h1>Index</h1>
+<h1>End Of Day Check In - Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
-<table class="table">
+<table id="table"
+       data-toggle="table"
+       data-height="700"
+       data-pagination="true"
+       class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Comments)
+            <th data-field="Created" data-sortable="true">
+                Created At
+            </th>
+            <th data-field="LastModified" data-sortable="true">
+                Last Modified
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.WhatWentWell)
+                Actions
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.WhatWentBad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Created)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastModified)
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Comments)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.WhatWentWell)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.WhatWentBad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Created)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastModified)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @for (int i = 0; i < Model.Count(); i++)
+        {
+            <tr id="tr-id-@i" class="tr-class-@i" data-title="bootstrap table" data-object='{"key": "value"}'>
+                <td id="td-id-@i" class="td-class-@i" data-title="bootstrap table">
+                    @Html.DisplayFor(modelItem => Model[i].Created)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => Model[i].LastModified)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@Model[i].Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@Model[i].Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+@section Scripts{
+
+    <script src="https://unpkg.com/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.17.1/dist/extensions/resizable/bootstrap-table-resizable.min.js"></script>
+    <script>
+        $(function () {
+            $('#table').bootstrapTable()
+        })
+    </script>
+}

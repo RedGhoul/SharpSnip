@@ -104,7 +104,7 @@ namespace Snips.Controllers
             {
                 try
                 {
-                    endOfDayCheckIn.Created = DateTime.UtcNow;
+                    endOfDayCheckIn.LastModified = DateTime.UtcNow;
                     
                     endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
 

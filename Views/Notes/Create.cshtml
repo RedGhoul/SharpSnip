@@ -1,8 +1,5 @@
 ﻿@model Snips.Data.Note
 
-@{
-    ViewData["Title"] = "Create";
-}
 <link href="https://cdn.quilljs.com/1.3.4/quill.snow.css" rel="stylesheet">
 <style>
     .control-label {
@@ -71,8 +68,30 @@
     <script src="https://cdn.quilljs.com/1.3.4/quill.js"></script>
     <script>
         window.addEventListener('load', (event) => {
+            var toolbarOptions = [
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote', 'code-block'],
+
+                [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+                [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+                [{ 'direction': 'rtl' }],                         // text direction
+
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+
+                ['clean']                                         // remove formatting button
+            ];
             var quillDocs = new Quill('#editorContent', {
-                theme: 'snow'
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
             });
             quillDocs.on('text-change', function (delta) {
                 var Documentation = document.querySelector('input[name=Content]');
@@ -83,7 +102,7 @@
             var textarea = document.getElementById("CodeContent");
             textarea.style.visibility = "hidden";
             editor.setTheme("ace/theme/dracula");
-            editor.session.setMode("ace/mode/sql");
+            editor.session.setMode("ace/mode/markdown");
             editor.setOptions({
                 fontSize: "16px"
             });

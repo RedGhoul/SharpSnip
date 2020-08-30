@@ -1,8 +1,5 @@
 ﻿@model List<Snips.Models.NoteDTO>
 
-@{
-    ViewData["Title"] = "Index";
-}
 <link href="https://unpkg.com/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.css" rel="stylesheet">
 <link href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css" rel="stylesheet">
 
@@ -37,7 +34,7 @@
 </form>
 <table id="table"
        data-toggle="table"
-       data-height="500"
+       data-height="700"
        data-pagination="true"
        class="table">
     <thead>
@@ -57,7 +54,6 @@
             <th data-field="LastModified" data-sortable="true">
                 Last Modified
             </th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -65,7 +61,7 @@
         {
             <tr id="tr-id-@i" class="tr-class-@i" data-title="bootstrap table" data-object='{"key": "value"}'>
                 <td id="td-id-@i" class="td-class-@i" data-title="bootstrap table">
-                    @Html.DisplayFor(modelItem => Model[i].Name)
+                    <a asp-action="Edit" asp-route-id="@Model[i].Id">@Html.DisplayFor(modelItem => Model[i].Name)</a>
                 </td>
                 <td>
                     @if (Model[i].HasCode)
@@ -94,10 +90,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => Model[i].LastModified)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@Model[i].Id">View-Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@Model[i].Id">Delete</a>
                 </td>
             </tr>
         }
