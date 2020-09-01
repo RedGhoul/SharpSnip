@@ -36,12 +36,14 @@ namespace Snips
                .AddDefaultUI()
                .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddCors();
             services.AddControllersWithViews();
             services.AddRazorPages();
 
             services.AddResponseCompression();
             services.AddTransient<UserManager<ApplicationUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
+
 
         }
 
@@ -62,7 +64,10 @@ namespace Snips
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
             app.UseRouting();
 
             app.UseAuthentication();
