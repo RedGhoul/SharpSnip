@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Snips.Data;
 using Snips.Models;
 
@@ -17,9 +18,11 @@ namespace Snips.Controllers
     {
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<NotesController> _logger;
 
-        public NotesController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public NotesController(ILogger<NotesController> logger, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
+            _logger = logger;
             _context = context;
             _userManager = userManager;
         } 
@@ -58,7 +61,25 @@ namespace Snips.Controllers
                 Created = x.Created,
                 LastModified = (DateTime)x.LastModified
             });
-            return View("Index",await snipsQueryItems.ToListAsync());
+
+            try
+            {
+                return View("Index", await snipsQueryItems.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error searching the DB for Notes with SearchTerms {SearchTerm}");
+                var AllUserSnips = await _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false).Select(x => new NoteDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    HasCode = x.HasCode,
+                    CodeLanguage = x.CodeLanguage,
+                    Created = x.Created,
+                    LastModified = (DateTime)x.LastModified
+                }).ToListAsync();
+                return View("Index", AllUserSnips);
+            }
         }
 
         // GET: Notes
