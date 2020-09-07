@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Snips.Data;
 
 namespace Snips.Controllers
@@ -16,9 +17,10 @@ namespace Snips.Controllers
     {
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-
-        public EndOfDayCheckInsController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        private readonly ILogger<EndOfDayCheckInsController> _logger;
+        public EndOfDayCheckInsController(ILogger<EndOfDayCheckInsController> logger, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
+            _logger = logger;
             _context = context;
             _userManager = userManager;
         }
@@ -59,18 +61,25 @@ namespace Snips.Controllers
         // POST: EndOfDayCheckIns/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Comments,WhatWentWell,WhatWentBad,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
+        public async Task<IActionResult> Create([Bind("Id,Comments,WhatWentWell,WhatWentBad,Created")] EndOfDayCheckIn endOfDayCheckIn)
         {
-            if (ModelState.IsValid)
+            endOfDayCheckIn.LastModified = DateTime.UtcNow;
+            if (endOfDayCheckIn.Created == new DateTime())
             {
-                endOfDayCheckIn.LastModified = DateTime.UtcNow;
                 endOfDayCheckIn.Created = DateTime.UtcNow;
-                endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
-                _context.Add(endOfDayCheckIn);
+            }
+            endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
+            _context.Add(endOfDayCheckIn);
+            try
+            {
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(endOfDayCheckIn);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could properly save EndOfDayCheckin");
+                return View(endOfDayCheckIn);
+            }
         }
 
         // GET: EndOfDayCheckIns/Edit/5
@@ -93,39 +102,36 @@ namespace Snips.Controllers
         // POST: EndOfDayCheckIns/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Comments,WhatWentWell,WhatWentBad,Created,LastModified")] EndOfDayCheckIn endOfDayCheckIn)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Comments,WhatWentWell,WhatWentBad,Created")] EndOfDayCheckIn endOfDayCheckIn)
         {
             if (id != endOfDayCheckIn.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    endOfDayCheckIn.LastModified = DateTime.UtcNow;
-                    
-                    endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
+                endOfDayCheckIn.LastModified = DateTime.UtcNow;                
+                endOfDayCheckIn.ApplicationUserId = GetCurrentUserId();
+                _context.Update(endOfDayCheckIn);
 
-                    _context.Update(endOfDayCheckIn);
-                    
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EndOfDayCheckInExists(endOfDayCheckIn.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(endOfDayCheckIn);
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!EndOfDayCheckInExists(endOfDayCheckIn.Id))
+                {
+                    _logger.LogError(ex, $"DbUpdateConcurrencyException occured when " +
+                        $"trying to update non existant");
+                    return NotFound();
+                }
+                else
+                {
+                    _logger.LogError(ex, $"DbUpdateConcurrencyException occured when " +
+                       $"trying to update endOfDayCheckIn with Id {endOfDayCheckIn.Id}");
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: EndOfDayCheckIns/Delete/5

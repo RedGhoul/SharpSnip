@@ -24,6 +24,18 @@
             </div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
+                <label class="control-label" for="Created">Date Created</label>
+                <div class="row">
+                    <div class="col-6">
+                        <input type="date" asp-for="Created" class="form-control" />
+
+                    </div>
+                    <div class="col-6">
+
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="control-label" for="Comments">Comments</label>
                 <input asp-for="Comments" class="form-control" hidden />
                 <div id="editorContentComments" style="height: 300px;">

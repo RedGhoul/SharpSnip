@@ -30,10 +30,10 @@
         {
             <tr id="tr-id-@i" class="tr-class-@i" data-title="bootstrap table" data-object='{"key": "value"}'>
                 <td id="td-id-@i" class="td-class-@i" data-title="bootstrap table">
-                    @Html.DisplayFor(modelItem => Model[i].Created)
+                    @String.Format("{0:dddd, MMMM d, yyyy}", Model[i].Created)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => Model[i].LastModified)
+                    @String.Format("{0:dddd, MMMM d, yyyy}", Model[i].LastModified)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@Model[i].Id">Edit</a> |

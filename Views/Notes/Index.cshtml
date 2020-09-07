@@ -86,10 +86,17 @@
 
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => Model[i].Created)
+                    @if (Model[i].Created == new DateTime())
+                    {
+                        <p>N/A</p>
+                    }
+                    else
+                    {
+                        @String.Format("{0:dddd, MMMM d, yyyy}", Model[i].Created)
+                    }
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => Model[i].LastModified)
+                    @String.Format("{0:dddd, MMMM d, yyyy}", Model[i].LastModified)
                 </td>
             </tr>
         }
