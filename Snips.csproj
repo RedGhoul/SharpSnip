@@ -17,6 +17,12 @@
     <Compile Remove="Migrations\20200818190558_setupTsVectors.Designer.cs" />
     <Compile Remove="Migrations\20200819013407_modifynotetrigger.cs" />
     <Compile Remove="Migrations\20200819013407_modifynotetrigger.Designer.cs" />
+    <Compile Remove="Migrations\20200918214926_tookoutCheckins.cs" />
+    <Compile Remove="Migrations\20200918214926_tookoutCheckins.Designer.cs" />
+    <Compile Remove="Migrations\20200918215246_tookoutCheckins.cs" />
+    <Compile Remove="Migrations\20200918215246_tookoutCheckins.Designer.cs" />
+    <Compile Remove="Migrations\20200918215406_tookoutCheckins.cs" />
+    <Compile Remove="Migrations\20200918215406_tookoutCheckins.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -223,51 +223,6 @@ namespace Snips.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("Snips.Data.EndOfDayCheckIn", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Comments")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<NpgsqlTsVector>("SearchVector")
-                        .HasColumnType("tsvector");
-
-                    b.Property<string>("WhatWentBad")
-                        .HasColumnType("text");
-
-                    b.Property<string>("WhatWentWell")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("Created");
-
-                    b.HasIndex("LastModified");
-
-                    b.HasIndex("SearchVector")
-                        .HasAnnotation("Npgsql:IndexMethod", "GIN");
-
-                    b.ToTable("EndOfDayCheckIns");
-                });
-
             modelBuilder.Entity("Snips.Data.Note", b =>
                 {
                     b.Property<int>("Id")
@@ -452,13 +407,6 @@ namespace Snips.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Snips.Data.EndOfDayCheckIn", b =>
-                {
-                    b.HasOne("Snips.Data.ApplicationUser", "ApplicationUser")
-                        .WithMany("EndOfDayCheckIns")
-                        .HasForeignKey("ApplicationUserId");
                 });
 
             modelBuilder.Entity("Snips.Data.Note", b =>
