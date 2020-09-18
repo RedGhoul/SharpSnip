@@ -151,6 +151,10 @@ namespace Snips.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (string.IsNullOrWhiteSpace(note.Name))
+                {
+                    return View(note);
+                }
                 note.ApplicationUserId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(note.CodeContent))
                 {
@@ -168,7 +172,7 @@ namespace Snips.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", note.ApplicationUserId);
+            //ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", note.ApplicationUserId);
             return View(note);
         }
 

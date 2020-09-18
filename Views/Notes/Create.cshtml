@@ -21,18 +21,21 @@
         <form asp-action="Create">
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
+                <a id="AddCode" class="btn btn-primary">Add Code Snip</a>
+                <a id="AddNote" class="btn btn-primary">Add Note Snip</a>
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
             </div>
-            <div class="form-group">
+            <div class="form-group" id="note-content">
                 <label asp-for="Content" class="control-label"></label>
                 <input asp-for="Content" class="form-control" hidden />
                 <div id="editorContent" style="height: 300px;">
                 </div>
             </div>
-            <div class="form-group">
+
+            <div class="form-group" id="code-picker">
                 <label asp-for="CodeLanguage" class="control-label"></label>
                 <select class="selectpicker form-control"
                         asp-for="CodeLanguage">
@@ -46,7 +49,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="code-content">
                 <label for="text">Code</label>
                 <div id="codeEditor"></div>
                 <textarea class="form-control"
@@ -67,6 +70,32 @@
     <script src="https://cdn.quilljs.com/1.3.4/quill.js"></script>
     <script>
         window.addEventListener('load', (event) => {
+            var codepicker = $("#code-picker");
+            var codeContent = $("#code-content");
+            var noteContent = $("#note-content")
+            codepicker.hide();
+            codeContent.hide();
+            noteContent.hide();
+
+            $("#AddCode").click(function () {
+                if (codepicker.is(":hidden")) {
+                    codepicker.show();
+                    codeContent.show();
+                } else {
+                    codepicker.hide();
+                    codeContent.hide();
+                }
+                
+            });
+
+            $("#AddNote").click(function () {
+                if (noteContent.is(":hidden")) {
+                    noteContent.show();
+                } else {
+                    noteContent.hide();
+                }
+            });
+
             var toolbarOptions = [
                 ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
                 ['blockquote', 'code-block'],

@@ -25,19 +25,31 @@
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
+                @if (string.IsNullOrWhiteSpace(Model.Content))
+                {
+                    <a id="ViewNote" class="btn btn-primary">Add Note Snip</a>
+                }
+
+
+                @if (string.IsNullOrWhiteSpace(Model.CodeContent))
+                {
+                    <a id="ViewCode" class="btn btn-primary">Add Code Snip</a>
+                }
+
+
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
             </div>
-            <div class="form-group">
+            <div class="form-group" id="note-content">
                 <label asp-for="Content" class="control-label"></label>
                 <input asp-for="Content" class="form-control" hidden />
                 <div id="editorContent" style="height: 300px;">
                     @Html.Raw(Model.Content)
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="code-picker">
                 <a id="lang_id" hidden>@Model.CodeLanguage</a>
                 <label asp-for="CodeLanguage" class="control-label"></label>
                 <select class="selectpicker form-control"
@@ -52,7 +64,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="code-content">
                 <label for="text">Code</label>
                 <div id="codeEditor"></div>
                 <textarea class="form-control"
@@ -77,6 +89,31 @@
             crossorigin="anonymous"></script>
     <script>
         window.addEventListener('load', (event) => {
+            var codepicker = $("#code-picker");
+            var codeContent = $("#code-content");
+            var noteContent = $("#note-content")
+
+            @if (string.IsNullOrWhiteSpace(Model.Content)) {
+                @Html.Raw("noteContent.hide();")
+            }
+
+            @if (string.IsNullOrWhiteSpace(Model.CodeContent)) {
+                @Html.Raw("codepicker.hide();")
+                @Html.Raw("codeContent.hide();")
+            }
+
+            $("#ViewCode").click(function () {
+                codepicker.show();
+                codeContent.show();
+                $("#ViewCode").hide();
+            });
+
+            $("#ViewNote").click(function () {
+                noteContent.show();
+                $("#ViewNote").hide();
+            });
+
+
             var quillDocs = new Quill('#editorContent', {
                 theme: 'snow'
             });

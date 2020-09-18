@@ -2,36 +2,61 @@
 
 <link href="https://unpkg.com/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.css" rel="stylesheet">
 <link href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css" rel="stylesheet">
+<div class="spacer">
 
-<h1>Notes - Index</h1>
+</div>
+<div class="row">
+    <div class="col-4">
+        <h1>Notes - Index</h1>
+    </div>
+    <div class="col-7">
 
-<p>
-    <a class="btn btn-primary" asp-action="Create">Create New</a>
-</p>
-<form asp-action="Search">
+    </div>
+    <div class="col-1">
+        <a class="btn btn-primary" asp-action="Create">Create New</a>
+    </div>
+</div>
+<div class="spacer">
 
-    <div class="form-group">
-        <label name="SearchTerm" class="control-label">Search Terms - Server</label>
-        <input name="SearchTerm" class="form-control" />
+</div>
+<div class="row">
+    <div class="col-2">
+
     </div>
-    <div class="form-group">
-        <label class="control-label">Created Date</label>
-        <input name="CreatedDate" type="date" class="form-control" />
+    <div class="col-8">
+        <form asp-action="Search">
+
+            <div class="form-group">
+                <label name="SearchTerm" class="control-label">Search Terms - Server</label>
+                <input name="SearchTerm" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Created Date</label>
+                <input name="CreatedDate" type="date" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Last Modified Date</label>
+                <input name="LastModifiedDate" type="date" class="form-control" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Search" class="btn btn-primary" />
+                <a asp-controller="Notes" asp-action="Index" class="btn btn-primary">Reset Search</a>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label class="control-label">Last Modified Date</label>
-        <input name="LastModifiedDate" type="date" class="form-control" />
+    <div class="col-2">
+
     </div>
-    <div class="form-group">
-        <input type="submit" value="Search" class="btn btn-primary" />
-        <a asp-controller="Notes" asp-action="Index" class="btn btn-primary">Reset</a>
-    </div>
-</form>
-<form asp-action="ReIndex">
+    
+</div>
+<div class="spacer">
+
+</div>
+@*<form asp-action="ReIndex">
     <div class="form-group">
         <input type="submit" value="ReIndex" class="btn btn-danger" />
     </div>
-</form>
+</form>*@
 <table id="table"
        data-toggle="table"
        data-height="700"
