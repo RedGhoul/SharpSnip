@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Snips</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cyborg/bootstrap.min.css" integrity="sha384-nEnU7Ae+3lD52AK+RGNzgieBWMnEfgTbRHIwEvp1XXPdqdO6uLTd/NwXbzboqjc2" crossorigin="anonymous">
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.2/sketchy/bootstrap.min.css" integrity="sha512-MLBa0Cgd6yykQy339umH4KqKv2mqS6q1j639uckwIl384hdc7DtER8PgVaRq7o0JlTIJPRqvQ6jxQKlixp0uYQ==" crossorigin="anonymous" />    <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" integrity="sha512-/FHUK/LsH78K9XTqsR9hbzr21J8B8RwHR/r8Jv9fzry6NVAOVIGFKQCNINsbhK7a1xubVu2r5QZcz2T9cKpubw==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.4/css/alertify.min.css" integrity="sha256-HyknUQX006D7lC1CzL2BQqMMjX7cQV7unnkuNrYUDgM=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.4/css/themes/bootstrap.min.css" integrity="sha256-tWRKenfvuraOz4u9wNIkJVrUFbRN712r9WtYhGUPirg=" crossorigin="anonymous" />
@@ -15,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color:white;">Snips</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Snips</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation" style="background:white;">
                     <span class="navbar-toggler-icon"></span>
@@ -23,16 +22,10 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <partial name="_LoginPartial" />
                     <ul class="navbar-nav flex-grow-1">
-
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Notes" asp-action="Index">Notes</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="EndOfDayCheckIns" asp-action="Index">End Of Day CheckIns</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ToDoLists" asp-action="Index">ToDoLists</a>
-                        </li>
+                       
                     </ul>
                 </div>
             </div>
@@ -44,7 +37,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer text-muted">
         <div class="container">
             &copy; 2020 - Snips - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

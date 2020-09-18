@@ -23,6 +23,8 @@
     <Compile Remove="Migrations\20200918215246_tookoutCheckins.Designer.cs" />
     <Compile Remove="Migrations\20200918215406_tookoutCheckins.cs" />
     <Compile Remove="Migrations\20200918215406_tookoutCheckins.Designer.cs" />
+    <Compile Remove="Migrations\20200918215526_tookoutCheckins.cs" />
+    <Compile Remove="Migrations\20200918215526_tookoutCheckins.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
