@@ -25,9 +25,28 @@ namespace Snips.Controllers
             _logger = logger;
             _context = context;
             _userManager = userManager;
-        } 
+        }
 
         // GET: Notes
+        public async Task<IActionResult> Index()
+        {
+            var snipsQueryItems = _context.Notes.Include(x => x.CodingLanguage)
+                .Where(x => x.Deleted == false)
+                .OrderByDescending(x => x.LastModified)
+                .Select(x => new
+            NoteDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    HasCode = x.HasCode,
+                    CodeLanguage = x.CodingLanguage.Name,
+                    Created = x.Created,
+                    LastModified = x.LastModified.GetValueOrDefault(DateTime.UtcNow)
+                }).ToListAsync();
+            return View(await snipsQueryItems);
+        }
+
+        // POST: Search
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(string SearchTerm, DateTime CreatedDate, DateTime LastModifiedDate)
@@ -43,7 +62,8 @@ namespace Snips.Controllers
             }
 
 
-            if (LastModifiedDate != new DateTime()) {
+            if (LastModifiedDate != new DateTime())
+            {
 
                 snipsQuery = snipsQuery.Where(x => x.LastModified.Value.Date == LastModifiedDate.ToUniversalTime().Date);
             }
@@ -52,12 +72,12 @@ namespace Snips.Controllers
             {
                 snipsQuery = snipsQuery.Where(x => x.Created.Date == CreatedDate.ToUniversalTime().Date);
             }
-            var snipsQueryItems = snipsQuery.OrderByDescending(x => x.LastModified).Select(x => new NoteDTO
+            var snipsQueryItems = snipsQuery.Include(x => x.CodingLanguage).OrderByDescending(x => x.LastModified).Select(x => new NoteDTO
             {
                 Id = x.Id,
                 Name = x.Name,
                 HasCode = x.HasCode,
-                CodeLanguage = x.CodeLanguage,
+                CodeLanguage = x.CodingLanguage.Name,
                 Created = x.Created,
                 LastModified = (DateTime)x.LastModified
             });
@@ -69,12 +89,12 @@ namespace Snips.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error searching the DB for Notes with SearchTerms {SearchTerm}");
-                var AllUserSnips = await _context.Notes.Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false).Select(x => new NoteDTO
+                var AllUserSnips = await _context.Notes.Include(x => x.CodingLanguage).Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Deleted == false).Select(x => new NoteDTO
                 {
                     Id = x.Id,
                     Name = x.Name,
                     HasCode = x.HasCode,
-                    CodeLanguage = x.CodeLanguage,
+                    CodeLanguage = x.CodingLanguage.Name,
                     Created = x.Created,
                     LastModified = (DateTime)x.LastModified
                 }).ToListAsync();
@@ -99,22 +119,6 @@ namespace Snips.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        // GET: Notes
-        public async Task<IActionResult> Index()
-        {
-            var snipsQueryItems = _context.Notes.Where(x => x.Deleted == false)
-                .OrderByDescending(x => x.LastModified).Select(x => new
-            NoteDTO
-            {
-                Id = x.Id,
-                Name = x.Name,
-                HasCode = x.HasCode,
-                CodeLanguage = x.CodeLanguage,
-                Created = x.Created,
-                LastModified = x.LastModified.GetValueOrDefault(DateTime.UtcNow)
-            }).ToListAsync();
-            return View(await snipsQueryItems);
-        }
 
         // GET: Notes/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -138,42 +142,46 @@ namespace Snips.Controllers
         // GET: Notes/Create
         public IActionResult Create()
         {
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id");
-            return View();
+            var vm = new NoteEditViewModel
+            {
+                Note = new Note()
+                {
+                    CodingLanguageId = 0
+                },
+                CodingLanguages = new SelectList(_context.CodingLanguages.ToList(), "Id", "Name")
+            };
+            return View(vm);
         }
 
         // POST: Notes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Content,CodeLanguage,CodeContent")] Note note)
+        public async Task<IActionResult> Create(NoteEditViewModel vm)
         {
             if (ModelState.IsValid)
             {
-                if (string.IsNullOrWhiteSpace(note.Name))
+                if (string.IsNullOrWhiteSpace(vm.Note.Name))
                 {
-                    return View(note);
+                    return View(vm.Note);
                 }
-                note.ApplicationUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(note.CodeContent))
+                vm.Note.ApplicationUserId = GetCurrentUserId();
+                if (string.IsNullOrEmpty(vm.Note.CodeContent))
                 {
-                    note.HasCode = false;
+                    vm.Note.HasCode = false;
                 }
                 else
                 {
-                    note.HasCode = true;
+                    vm.Note.HasCode = true;
                 }
-                
-                note.LastModified = DateTime.UtcNow;
-                note.Created = DateTime.UtcNow;
 
-                _context.Add(note);
+                vm.Note.LastModified = DateTime.UtcNow;
+                vm.Note.Created = DateTime.UtcNow;
+
+                _context.Add(vm.Note);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            //ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", note.ApplicationUserId);
-            return View(note);
+            return View(vm.Note);
         }
 
         // GET: Notes/Edit/5
@@ -184,23 +192,30 @@ namespace Snips.Controllers
                 return NotFound();
             }
 
-            var note = await _context.Notes.FindAsync(id);
+            var note = await _context.Notes
+                .Include(x => x.CodingLanguage)
+                .SingleOrDefaultAsync(x => x.Id == id);
+
             if (note == null)
             {
                 return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", note.ApplicationUserId);
-            return View(note);
+
+            var vm = new NoteEditViewModel
+            {
+                Note = note,
+                CodingLanguages = new SelectList(_context.CodingLanguages.ToList(), "Id", "Name")
+            };
+
+            return View(vm);
         }
 
         // POST: Notes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Content,CodeLanguage,CodeContent")] Note note)
+        public async Task<IActionResult> Edit(int id, NoteEditViewModel vm)
         {
-            if (id != note.Id)
+            if (id != vm.Note.Id)
             {
                 return NotFound();
             }
@@ -209,22 +224,23 @@ namespace Snips.Controllers
             {
                 try
                 {
-                    note.ApplicationUserId = GetCurrentUserId();
-                    if (string.IsNullOrEmpty(note.CodeContent))
+                    vm.Note.ApplicationUserId = GetCurrentUserId();
+                    if (string.IsNullOrEmpty(vm.Note.CodeContent))
                     {
-                        note.HasCode = false;
+                        vm.Note.HasCode = false;
                     }
                     else
                     {
-                        note.HasCode = true;
+                        vm.Note.HasCode = true;
                     }
-                    note.LastModified = DateTime.UtcNow;
-                    _context.Update(note);
+                    vm.Note.LastModified = DateTime.UtcNow;
+   
+                    _context.Update(vm.Note);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!NoteExists(note.Id))
+                    if (!NoteExists(vm.Note.Id))
                     {
                         return NotFound();
                     }
@@ -235,7 +251,7 @@ namespace Snips.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(note);
+            return View(vm);
         }
 
         // GET: Notes/Delete/5
@@ -264,12 +280,12 @@ namespace Snips.Controllers
             var note = await _context.Notes
                 .Where(x => x.ApplicationUserId.Equals(GetCurrentUserId()) && x.Id == id)
                 .FirstOrDefaultAsync();
-            if(note != null)
+            if (note != null)
             {
                 note.Deleted = true;
                 await _context.SaveChangesAsync();
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 

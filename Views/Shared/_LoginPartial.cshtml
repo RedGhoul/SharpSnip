@@ -8,6 +8,12 @@
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-controller="Notes" asp-action="Index">Notes</a>
         </li>
+        if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="CodeLanguages" asp-action="Index">Code Languages</a>
+            </li>
+        }
 
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-controller="ToDoLists" asp-action="Index">ToDoLists</a>

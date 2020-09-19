@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -10,9 +11,10 @@ using Snips.Data;
 namespace Snips.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200919021750_AddedCodeLanguageTable")]
+    partial class AddedCodeLanguageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -257,9 +259,6 @@ namespace Snips.Migrations
                     b.Property<string>("CodeLanguage")
                         .HasColumnType("text");
 
-                    b.Property<int?>("CodingLanguageId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Content")
                         .HasColumnType("text");
 
@@ -284,8 +283,6 @@ namespace Snips.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("CodingLanguageId");
 
                     b.HasIndex("Created");
 
@@ -364,7 +361,7 @@ namespace Snips.Migrations
                     b.Property<NpgsqlTsVector>("SearchVector")
                         .HasColumnType("tsvector");
 
-                    b.Property<int?>("ToDoListId")
+                    b.Property<int>("ToDoListId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -436,21 +433,14 @@ namespace Snips.Migrations
                 {
                     b.HasOne("Snips.Data.ApplicationUser", "ApplicationUser")
                         .WithMany("Notes")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Snips.Data.CodeLanguage", "CodingLanguage")
-                        .WithMany("Notes")
-                        .HasForeignKey("CodingLanguageId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("ApplicationUserId");
                 });
 
             modelBuilder.Entity("Snips.Data.ToDoList", b =>
                 {
                     b.HasOne("Snips.Data.ApplicationUser", "ApplicationUser")
                         .WithMany("ToDoLists")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("ApplicationUserId");
                 });
 
             modelBuilder.Entity("Snips.Data.ToDoListItem", b =>
@@ -458,7 +448,8 @@ namespace Snips.Migrations
                     b.HasOne("Snips.Data.ToDoList", "ToDoList")
                         .WithMany("ToDoListItems")
                         .HasForeignKey("ToDoListId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

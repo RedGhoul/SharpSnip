@@ -14,13 +14,13 @@ namespace Snips.Data
             this.Deleted = false;
         }
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
         [NotMapped]
         public NpgsqlTsVector SearchVector { get; set; }
         public ICollection<ToDoListItem> ToDoListItems { get; set; }
         public bool Deleted { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
-        public string ApplicationUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model Snips.Data.Note
+﻿@model NoteEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -22,16 +22,16 @@
 <div class="row">
     <div class="col-md-12">
         <form asp-action="Edit">
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="@Model.Note.Id" />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
-                @if (string.IsNullOrWhiteSpace(Model.Content))
+                @if (string.IsNullOrWhiteSpace(@Model.Note.Content))
                 {
                     <a id="ViewNote" class="btn btn-primary">Add Note Snip</a>
                 }
 
 
-                @if (string.IsNullOrWhiteSpace(Model.CodeContent))
+                @if (string.IsNullOrWhiteSpace(@Model.Note.CodeContent))
                 {
                     <a id="ViewCode" class="btn btn-primary">Add Code Snip</a>
                 }
@@ -39,28 +39,29 @@
 
             </div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <label asp-for="@Model.Note.Name" class="control-label"></label>
+                <input asp-for="@Model.Note.Name" class="form-control" />
             </div>
             <div class="form-group" id="note-content">
-                <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" hidden />
+                <label asp-for="@Model.Note.Content" class="control-label"></label>
+                <input asp-for="@Model.Note.Content" class="form-control" hidden />
                 <div id="editorContent" style="height: 300px;">
-                    @Html.Raw(Model.Content)
+                    @Html.Raw(@Model.Note.Content)
                 </div>
             </div>
             <div class="form-group" id="code-picker">
-                <a id="lang_id" hidden>@Model.CodeLanguage</a>
-                <label asp-for="CodeLanguage" class="control-label"></label>
-                <select class="selectpicker form-control"
-                        asp-for="CodeLanguage">
-                    <option value="c" id="c">C</option>
-                    <option value="sql" id="sql">SQL</option>
-                    <option value="python3" id="python3">Python3</option>
-                    <option value="java" id="java">Java</option>
-                    <option value="csharp" id="csharp">C#</option>
-                    <option value="html" id="html">HTML</option>
-                    <option value="markdown" id="markdown">Markdown</option>
+                @if (Model.Note.CodingLanguage == null)
+                {
+                    <a id="lang_id" hidden></a>
+                }
+                else
+                {
+                    <a id="lang_id" hidden>@Model.Note.CodingLanguage.Name</a>
+                }
+
+                <label class="control-label">Coding Language</label>
+                <select class="selectpicker form-control" asp-for="@Model.Note.CodingLanguageId" asp-items="@Model.CodingLanguages">
+                    <option>Please select one</option>
                 </select>
             </div>
 
@@ -69,8 +70,8 @@
                 <div id="codeEditor"></div>
                 <textarea class="form-control"
                           type="text"
-                          asp-for="CodeContent">
-                @Html.Raw(Model.CodeContent)
+                          asp-for="@Model.Note.CodeContent">
+                @Html.Raw(Model.Note.CodeContent)
                 </textarea>
             </div>
             <div class="form-group">
@@ -93,11 +94,11 @@
             var codeContent = $("#code-content");
             var noteContent = $("#note-content")
 
-            @if (string.IsNullOrWhiteSpace(Model.Content)) {
+            @if (string.IsNullOrWhiteSpace(@Model.Note.Content)) {
                 @Html.Raw("noteContent.hide();")
             }
 
-            @if (string.IsNullOrWhiteSpace(Model.CodeContent)) {
+            @if (string.IsNullOrWhiteSpace(@Model.Note.CodeContent)) {
                 @Html.Raw("codepicker.hide();")
                 @Html.Raw("codeContent.hide();")
             }
@@ -123,17 +124,15 @@
             });
 
             var editor = ace.edit("codeEditor");
-            var textarea = document.getElementById("CodeContent");
+            var textarea = document.getElementById("Note_CodeContent");
             textarea.style.visibility = "hidden";
 
             var currentLang = document.getElementById("lang_id");
             currentLang.style.visibility = "hidden";
 
-            var formObj = document.getElementById("CodeLanguage");
-            formObj.value = currentLang.text;
 
             editor.setTheme("ace/theme/dracula");
-            editor.session.setMode("ace/mode/sql");
+            setCodeEditorSyntax()
             editor.setOptions({
                 fontSize: "16px"
             });
@@ -142,10 +141,15 @@
                 textarea.value = editor.getSession().getValue();
             });
             editor.clearSelection();
-            var langSelector = document.getElementById("CodeLanguage");
+
+            var langSelector = document.getElementById("Note_CodingLanguageId");
             langSelector.addEventListener("change", function () {
-                var x = document.getElementById("CodeLanguage");
-                var modeValue = x.options[x.selectedIndex].value;
+                setCodeEditorSyntax();
+            });
+
+            function setCodeEditorSyntax() {
+                var x = document.getElementById("Note_CodingLanguageId");
+                var modeValue = x.options[x.selectedIndex].textContent;
                 switch (modeValue) {
                     case "markdown":
                         editor.session.setMode("ace/mode/markdown");
@@ -172,7 +176,8 @@
                         editor.session.setMode("ace/mode/sql");
                         break;
                 }
-            });
+            }
+           
         });
     </script>
 }

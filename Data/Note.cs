@@ -23,6 +23,8 @@ namespace Snips.Data
         [NotMapped]
         public NpgsqlTsVector SearchVector { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
-        public string ApplicationUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
+        public CodeLanguage CodingLanguage { get; set; }
+        public int? CodingLanguageId { get; set; }
     }
 }

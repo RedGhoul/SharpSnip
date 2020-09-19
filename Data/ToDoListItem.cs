@@ -20,6 +20,6 @@ namespace Snips.Data
         public bool Done { get; set; }
         public bool Deleted { get; set; }
         public ToDoList ToDoList { get; set; }
-        public int ToDoListId { get; set; }
+        public int? ToDoListId { get; set; }
     }
 }

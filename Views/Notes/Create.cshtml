@@ -1,4 +1,4 @@
-﻿@model Snips.Data.Note
+﻿@model NoteEditViewModel
 
 <style>
     .control-label {
@@ -25,27 +25,20 @@
                 <a id="AddNote" class="btn btn-primary">Add Note Snip</a>
             </div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <label asp-for="@Model.Note.Name" class="control-label"></label>
+                <input asp-for="@Model.Note.Name" class="form-control" />
             </div>
             <div class="form-group" id="note-content">
-                <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" hidden />
+                <label asp-for="@Model.Note.Content" class="control-label"></label>
+                <input asp-for="@Model.Note.Content" class="form-control" hidden />
                 <div id="editorContent" style="height: 300px;">
                 </div>
             </div>
 
             <div class="form-group" id="code-picker">
-                <label asp-for="CodeLanguage" class="control-label"></label>
-                <select class="selectpicker form-control"
-                        asp-for="CodeLanguage">
-                    <option value="c" id="c">C</option>
-                    <option value="sql" id="sql">SQL</option>
-                    <option value="python3" id="python3">Python3</option>
-                    <option value="java" id="java">Java</option>
-                    <option value="csharp" id="csharp">C#</option>
-                    <option value="html" id="html">HTML</option>
-                    <option value="markdown" id="markdown">Markdown</option>
+                <label class="control-label">Coding Language</label>
+                <select class="selectpicker form-control" asp-for="@Model.Note.CodingLanguageId" asp-items="@Model.CodingLanguages">
+                    <option>Please select one</option>
                 </select>
             </div>
 
@@ -54,7 +47,7 @@
                 <div id="codeEditor"></div>
                 <textarea class="form-control"
                           type="text"
-                          asp-for="CodeContent"></textarea>
+                          asp-for="@Model.Note.CodeContent"></textarea>
             </div>
 
         </form>
@@ -127,10 +120,10 @@
             });
 
             var editor = ace.edit("codeEditor");
-            var textarea = document.getElementById("CodeContent");
+            var textarea = document.getElementById("Note_CodeContent");
             textarea.style.visibility = "hidden";
             editor.setTheme("ace/theme/dracula");
-            editor.session.setMode("ace/mode/markdown");
+            //editor.session.setMode("ace/mode/markdown");
             editor.setOptions({
                 fontSize: "16px"
             });
@@ -140,10 +133,10 @@
             });
             editor.clearSelection();
 
-            var langSelector = document.getElementById("CodeLanguage");
+            var langSelector = document.getElementById("Note_CodingLanguageId");
             langSelector.addEventListener("change", function () {
-                var x = document.getElementById("CodeLanguage");
-                var modeValue = x.options[x.selectedIndex].value;
+                var x = document.getElementById("Note_CodingLanguageId");
+                var modeValue = x.options[x.selectedIndex].textContent;
                 switch (modeValue) {
                     case "markdown":
                         editor.session.setMode("ace/mode/markdown");
