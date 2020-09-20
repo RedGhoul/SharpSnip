@@ -142,7 +142,7 @@ namespace Snips.Controllers
         // GET: Notes/Create
         public IActionResult Create()
         {
-            var vm = new NoteEditViewModel
+            var vm = new NoteCreateViewModel
             {
                 Note = new Note()
                 {
@@ -156,32 +156,29 @@ namespace Snips.Controllers
         // POST: Notes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(NoteEditViewModel vm)
+        public async Task<IActionResult> Create(NoteCreateViewModel vm)
         {
-            if (ModelState.IsValid)
+
+            if (string.IsNullOrWhiteSpace(vm.Note.Name))
             {
-                if (string.IsNullOrWhiteSpace(vm.Note.Name))
-                {
-                    return View(vm.Note);
-                }
-                vm.Note.ApplicationUserId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(vm.Note.CodeContent))
-                {
-                    vm.Note.HasCode = false;
-                }
-                else
-                {
-                    vm.Note.HasCode = true;
-                }
-
-                vm.Note.LastModified = DateTime.UtcNow;
-                vm.Note.Created = DateTime.UtcNow;
-
-                _context.Add(vm.Note);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(vm.Note);
             }
-            return View(vm.Note);
+            vm.Note.ApplicationUserId = GetCurrentUserId();
+            if (string.IsNullOrEmpty(vm.Note.CodeContent))
+            {
+                vm.Note.HasCode = false;
+            }
+            else
+            {
+                vm.Note.HasCode = true;
+            }
+
+            vm.Note.LastModified = DateTime.UtcNow;
+            vm.Note.Created = DateTime.UtcNow;
+
+            _context.Add(vm.Note);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Notes/Edit/5
@@ -234,7 +231,7 @@ namespace Snips.Controllers
                         vm.Note.HasCode = true;
                     }
                     vm.Note.LastModified = DateTime.UtcNow;
-   
+
                     _context.Update(vm.Note);
                     await _context.SaveChangesAsync();
                 }

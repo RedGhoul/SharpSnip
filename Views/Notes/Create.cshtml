@@ -1,4 +1,4 @@
-﻿@model NoteEditViewModel
+﻿@model NoteCreateViewModel
 
 <style>
     .control-label {
@@ -18,7 +18,7 @@
 <hr />
 <div class="row">
     <div class="col-md-12">
-        <form asp-action="Create">
+        <form asp-action="Create"  method="post">
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
                 <a id="AddCode" class="btn btn-primary">Add Code Snip</a>
@@ -115,8 +115,8 @@
                 },
             });
             quillDocs.on('text-change', function (delta) {
-                var Documentation = document.querySelector('input[name=Content]');
-                Documentation.value = quillDocs.root.innerHTML;
+                $("#Note_Content").val(quillDocs.root.innerHTML);
+                console.log($("#Note_Content").val());
             });
 
             var editor = ace.edit("codeEditor");
