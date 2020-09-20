@@ -27,9 +27,19 @@ namespace Snips
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string dbConnectionString = "";
+
+            if (Configuration.GetValue<string>("Enviroment").Equals("Dev"))
+            {
+                dbConnectionString = Configuration.GetConnectionString("DefaultConnection");
+            }
+            else
+            {
+                dbConnectionString = Configuration.GetConnectionString("DefaultConnection_PROD");
+            }
+
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(
-                    Configuration.GetConnectionString("DefaultConnection_PROD")));
+                options.UseNpgsql(dbConnectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                .AddDefaultTokenProviders()
