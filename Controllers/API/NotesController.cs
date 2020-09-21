@@ -2,22 +2,107 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Snips.Data;
+using Snips.Models;
 
 namespace Snips.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NotesController : ControllerBase
+    [Authorize]
+    public class NotesController : BaseController
     {
-        private readonly ApplicationDbContext _context;
 
-        public NotesController(ApplicationDbContext context)
+        public NotesController(ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager):base(context, userManager)
         {
-            _context = context;
+        }
+
+        // POST: api/Notes/NoteTitle
+        [HttpPost("NoteName/{id}")]
+        public async Task<ActionResult> UpdateCodeName(int id, [FromBody] UpdateNoteName value)
+        {
+            var curUser = await GetCurrentUser();
+            var note = await _context.Notes.Where(
+                x => x.Id == id &&
+                x.ApplicationUserId.Equals(curUser.Id)).FirstOrDefaultAsync();
+
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            note.Name = value.noteName;
+            _context.Entry(note).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok("Saved");
+        }
+
+        // POST: api/Notes/NoteContent
+        [HttpPost("NoteContent/{id}")]
+        public async Task<ActionResult> UpdateCodeContent(int id,[FromBody] UpdateNoteContent value)
+        {
+            var curUser = await GetCurrentUser();
+            var note = await _context.Notes.Where(
+                x => x.Id == id && 
+                x.ApplicationUserId.Equals(curUser.Id)).FirstOrDefaultAsync();
+
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            note.Content = value.noteContent;
+            _context.Entry(note).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok("Saved");
+        }
+
+        // POST: api/Notes/CodeContent
+        [HttpPost("CodeContent/{id}")]
+        public async Task<ActionResult> UpdateCodeContent(int id, [FromBody] UpdateCodeContent updateCodeContent)
+        {
+            var curUser = await GetCurrentUser();
+            var note = await _context.Notes.Where(
+                x => x.Id == id &&
+                x.ApplicationUserId.Equals(curUser.Id)).FirstOrDefaultAsync();
+
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            note.CodeContent = updateCodeContent.codeContent;
+            _context.Entry(note).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok("Saved");
+        }
+
+        // POST: api/Notes/CodeLang
+        [HttpPost("CodeLang/{id}/{langId}")]
+        public async Task<ActionResult> UpdateCodeLang(int id, int langId)
+        {
+            var curUser = await GetCurrentUser();
+            var note = await _context.Notes.Where(
+                x => x.Id == id &&
+                x.ApplicationUserId.Equals(curUser.Id)).FirstOrDefaultAsync();
+
+            var codeLang = await _context.CodingLanguages.FindAsync(langId);
+
+            if (note == null || codeLang == null)
+            {
+                return NotFound();
+            }
+
+            note.CodingLanguageId = codeLang.Id;
+            _context.Entry(note).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok("Saved");
         }
 
         // GET: api/Notes
@@ -42,8 +127,6 @@ namespace Snips.Controllers.API
         }
 
         // PUT: api/Notes/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutNote(int id, Note note)
         {
@@ -74,8 +157,6 @@ namespace Snips.Controllers.API
         }
 
         // POST: api/Notes
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
         public async Task<ActionResult<Note>> PostNote(Note note)
         {

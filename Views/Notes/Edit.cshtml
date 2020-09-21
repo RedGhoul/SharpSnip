@@ -21,10 +21,9 @@
 <hr />
 <div class="row">
     <div class="col-md-12">
-        <form asp-action="Edit" method="post">
+        <form>
             <input type="hidden" asp-for="@Model.Note.Id" />
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
                 @if (string.IsNullOrWhiteSpace(@Model.Note.Content))
                 {
                     <a id="ViewNote" class="btn btn-primary">Add Note Snip</a>
@@ -74,10 +73,6 @@
                 @Html.Raw(Model.Note.CodeContent)
                 </textarea>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-
         </form>
     </div>
 </div>
@@ -89,7 +84,10 @@
             integrity="sha256-C7DTYRJLG+B/VEzHGeoPMw699nsTQYPAXHKXZb+q04E="
             crossorigin="anonymous"></script>
     <script>
+      
         window.addEventListener('load', (event) => {
+            
+
             var codepicker = $("#code-picker");
             var codeContent = $("#code-content");
             var noteContent = $("#note-content")
@@ -114,23 +112,41 @@
                 $("#ViewNote").hide();
             });
 
+            var curTimeOutNoteName = null;
+            $("#Note_Name").keyup(function () {
+                if (curTimeOutNoteName !== null) {
+                    clearTimeout(curTimeOutNoteName);
+                }
+                curTimeOutNoteName = setTimeout(function () {
+                    $.ajax({
+                        url: "/api/Notes/NoteName/" + curNoteId,
+                        dataType: 'text',
+                        type: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ "noteName": $("#Note_Name").val() }),
+                        success: function (data, textStatus, jQxhr) {
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            alertify.message("Could not save change", 1000);
+                        }
+                    });
+                }, 500);
+            })
+
+
             var toolbarOptions = [
                 ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
                 ['blockquote', 'code-block'],
-
                 [{ 'header': 1 }, { 'header': 2 }],               // custom button values
                 [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                 [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
                 [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
                 [{ 'direction': 'rtl' }],                         // text direction
-
                 [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
                 [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-
                 [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
                 [{ 'font': [] }],
                 [{ 'align': [] }],
-
                 ['clean']                                         // remove formatting button
             ];
 
@@ -140,62 +156,113 @@
                     toolbar: toolbarOptions
                 },
             });
+
+            var curNoteId = $("#Note_Id").val();
+
+            var curTimeOutNoteContent = null;
             quillDocs.on('text-change', function (delta) {
                 $("#Note_Content").val(quillDocs.root.innerHTML);
-                console.log($("#Note_Content").val());
+                if (curTimeOutNoteContent !== null) {
+                    clearTimeout(curTimeOutNoteContent);
+                }
+                curTimeOutNoteContent = setTimeout(function () {
+                    $.ajax({
+                        url: "/api/Notes/NoteContent/" + curNoteId,
+                        dataType: 'text',
+                        type: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ "noteContent": $("#Note_Content").val() }),
+                        success: function (data, textStatus, jQxhr) {
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            alertify.message("Could not save change", 1000);
+                        }
+                    });
+                }, 500);
             });
 
-            var editor = ace.edit("codeEditor");
-            var textarea = document.getElementById("Note_CodeContent");
-            textarea.style.visibility = "hidden";
+            var codeContentText = $("#Note_CodeContent");
+            codeContentText.hide();
 
-            var currentLang = document.getElementById("lang_id");
-            currentLang.style.visibility = "hidden";
+            var aceEditor = ace.edit("codeEditor");
 
+            aceEditor.setTheme("ace/theme/dracula");
 
-            editor.setTheme("ace/theme/dracula");
-            setCodeEditorSyntax()
-            editor.setOptions({
+            aceEditor.setOptions({
                 fontSize: "16px"
             });
-            editor.getSession().setValue(textarea.value);
-            editor.getSession().on("change", function () {
-                textarea.value = editor.getSession().getValue();
-            });
-            editor.clearSelection();
 
-            var langSelector = document.getElementById("Note_CodingLanguageId");
-            langSelector.addEventListener("change", function () {
-                setCodeEditorSyntax();
+            aceEditor.getSession().setValue(codeContentText.val());
+
+            var curTimeOutCodeContent = null;
+            aceEditor.getSession().on("change", function () {
+                codeContentText.val(aceEditor.getSession().getValue());
+                if (curTimeOutCodeContent !== null) {
+                    clearTimeout(curTimeOutCodeContent);
+                }
+                curTimeOutCodeContent = setTimeout(function () {
+                    $.ajax({
+                        url: "/api/Notes/CodeContent/" + curNoteId,
+                        dataType: 'text',
+                        type: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ "codeContent": codeContentText.val() }),
+                        success: function (data, textStatus, jQxhr) {
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            alertify.message("Could not save change", 1000);
+                        }
+                    });
+                }, 500);
+                
             });
 
-            function setCodeEditorSyntax() {
-                var x = document.getElementById("Note_CodingLanguageId");
-                var modeValue = x.options[x.selectedIndex].textContent;
+            aceEditor.clearSelection();
+
+            var langDropDown = $("#Note_CodingLanguageId");
+            setCodeEditorSyntax($("#Note_CodingLanguageId :selected").text())
+            langDropDown.change(function () {
+                setCodeEditorSyntax($("#Note_CodingLanguageId :selected").text());
+                setTimeout(function () {
+                    $.ajax({
+                        url: "/api/Notes/CodeLang/" + curNoteId + "/" + $("#Note_CodingLanguageId :selected").val(),
+                        dataType: 'text',
+                        type: 'post',
+                        contentType: 'application/json',
+                        success: function (data, textStatus, jQxhr) {
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            alertify.message("Could not save change", 1000);
+                        }
+                    });
+                }, 500);
+            });
+
+            function setCodeEditorSyntax(modeValue) {
                 switch (modeValue) {
                     case "markdown":
-                        editor.session.setMode("ace/mode/markdown");
+                        aceEditor.session.setMode("ace/mode/markdown");
                         break;
                     case "c":
-                        editor.session.setMode("ace/mode/c_cpp");
+                        aceEditor.session.setMode("ace/mode/c_cpp");
                         break;
                     case "python3":
-                        editor.session.setMode("ace/mode/python");
+                        aceEditor.session.setMode("ace/mode/python");
                         break;
                     case "sql":
-                        editor.session.setMode("ace/mode/sql");
+                        aceEditor.session.setMode("ace/mode/sql");
                         break;
                     case "java":
-                        editor.session.setMode("ace/mode/java");
+                        aceEditor.session.setMode("ace/mode/java");
                         break;
                     case "html":
-                        editor.session.setMode("ace/mode/html");
+                        aceEditor.session.setMode("ace/mode/html");
                         break;
                     case "csharp":
-                        editor.session.setMode("ace/mode/csharp");
+                        aceEditor.session.setMode("ace/mode/csharp");
                         break;
                     default:
-                        editor.session.setMode("ace/mode/sql");
+                        aceEditor.session.setMode("ace/mode/sql");
                         break;
                 }
             }
