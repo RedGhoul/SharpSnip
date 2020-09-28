@@ -281,9 +281,11 @@ namespace Snips.Controllers
             {
                 note.Deleted = true;
                 await _context.SaveChangesAsync();
-            }
+                return RedirectToAction(nameof(Index));
 
-            return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction(nameof(Edit), new { id });
+            
         }
 
         private bool NoteExists(int id)
