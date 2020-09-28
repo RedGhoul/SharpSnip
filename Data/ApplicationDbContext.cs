@@ -15,8 +15,6 @@ namespace Snips.Data
         {
         }
 
-        public DbSet<ToDoList> ToDoLists { get; set; }
-        public DbSet<ToDoListItem> ToDoListItems { get; set; }
         public DbSet<Note> Notes { get; set; }
 
         public DbSet<CodeLanguage> CodingLanguages { get; set; }
@@ -39,35 +37,12 @@ namespace Snips.Data
             .HasForeignKey(note => note.CodingLanguageId)
             .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<ToDoList>()
-           .HasOne<ApplicationUser>(todolist => todolist.ApplicationUser)
-           .WithMany(appuser => appuser.ToDoLists)
-           .HasForeignKey(todolist => todolist.ApplicationUserId)
-           .OnDelete(DeleteBehavior.NoAction);
-
-            builder.Entity<ToDoListItem>()
-           .HasOne<ToDoList>(ToDoListItem => ToDoListItem.ToDoList)
-           .WithMany(todolist => todolist.ToDoListItems)
-           .HasForeignKey(todolistitem => todolistitem.ToDoListId)
-           .OnDelete(DeleteBehavior.NoAction);
-
 
             builder.Entity<Note>().HasIndex(n => n.LastModified);
             builder.Entity<Note>().HasIndex(n => n.Created);
             builder.Entity<Note>().HasIndex(n => n.SearchVector)
                 .HasMethod("GIN");
 
-            builder.Entity<ToDoListItem>().HasIndex(n => n.LastModified);
-            builder.Entity<ToDoListItem>().HasIndex(n => n.Created);
-            builder.Entity<ToDoListItem>().HasIndex(n => n.SearchVector)
-                .HasMethod("GIN");
-
-            builder.Entity<ToDoList>().HasIndex(n => n.LastModified);
-            builder.Entity<ToDoList>().HasIndex(n => n.Created);
-            builder.Entity<ToDoList>().HasIndex(n => n.SearchVector)
-                .HasMethod("GIN");
-
-            
         }
     }
 }

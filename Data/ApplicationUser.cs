@@ -15,7 +15,6 @@ namespace Snips.Data
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public ICollection<Note> Notes { get; set; }
-        public ICollection<ToDoList> ToDoLists { get; set; }
         public DateTime DateCreated { get; set; }
     }
 }
