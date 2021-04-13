@@ -41,10 +41,17 @@ namespace Snips
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(dbConnectionString));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => { 
+                options.SignIn.RequireConfirmedAccount = false;
+            })
                .AddDefaultTokenProviders()
                .AddDefaultUI()
                .AddEntityFrameworkStores<ApplicationDbContext>();
+            
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
 
             services.AddCors();
             services.AddControllersWithViews();
