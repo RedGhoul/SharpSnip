@@ -21,6 +21,7 @@ namespace Snips
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSentry();
                 });
     }
 }
